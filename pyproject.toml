@@ -4,13 +4,13 @@ build-backend = "hatchling.build"
 
 [project]
 name = "prepend_jira_issue"
-version = "0.0.2"
+version = "0.0.3"
 authors = [
   { name="Benjamin Falk", email="falk.ben@gmail.com" },
 ]
 description = "Pre-commit hook to prepend a Jira issue to a commit message"
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.10"
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",

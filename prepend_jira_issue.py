@@ -5,6 +5,19 @@ import re
 import subprocess
 from typing import Sequence
 
+CONVENTIONAL_COMMIT_TYPES = [
+  "build",
+  "chore",
+  "ci",
+  "docs",
+  "feat",
+  "fix",
+  "perf",
+  "refactor",
+  "revert",
+  "style",
+  "test"
+]
 
 def run_command(command: str) -> str:
     """Run a command and return its output
@@ -51,7 +64,18 @@ def get_commit_msg(commit_msg_filepath: str) -> str:
 
 
 def prepend_jira_issue(msg: str, issue: str) -> str:
-    return f"{issue}: {msg}"
+    # Handling Conventional Commit specification: the commit message starts with
+    # a type, an optional scope in parentheses and an optional breaking change
+    # marker ("!"), followed by a colon. Types are matched case-insensitively
+    # (specification rule 15).
+    # See: https://www.conventionalcommits.org/en/v1.0.0/#specification
+    types = "|".join(CONVENTIONAL_COMMIT_TYPES)
+    match = re.match(rf"(?:{types})(?:\([^)]*\))?!?:", msg, re.IGNORECASE)
+    if match:
+        prefix = match.group(0)
+        description = msg.removeprefix(prefix).lstrip(" ")
+        return f"{prefix} [{issue}] {description}"
+    return f"[{issue}]: {msg}"
 
 
 def write_commit_msg(commit_msg_filepath: str, commit_msg: str) -> None:

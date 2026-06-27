@@ -104,11 +104,51 @@ def test_prepend_jira_issue_short_msg():
     issue = "some_issue"
     new_msg = prepend_jira_issue.prepend_jira_issue(SHORT_COMMIT_MSG, issue)
 
-    assert new_msg == f"some_issue: {SHORT_COMMIT_MSG}"
+    assert new_msg == f"[some_issue]: {SHORT_COMMIT_MSG}"
 
 
 def test_prepend_jira_issue_long_msg():
     issue = "some_issue"
     new_msg = prepend_jira_issue.prepend_jira_issue(LONG_COMMIT_MSG, issue)
 
-    assert new_msg == f"some_issue: {LONG_COMMIT_MSG}"
+    assert new_msg == f"[some_issue]: {LONG_COMMIT_MSG}"
+
+@pytest.fixture
+def conventional_commit_msgs(request):
+    """Prefix each base commit message with a conventional commit header.
+
+    The commit type is passed in via indirect parametrization. Builds all
+    header variants for every base message: plain ("feat:"), breaking change
+    ("feat!:"), scoped ("feat(scope):"), scoped breaking change
+    ("feat(scope)!:") and case variants ("Feat:", "FEAT(scope)!:"), without
+    modifying the base message constants. Yields ``(header, base_msg,
+    commit_msg)`` tuples, where ``header`` is the full prefix up to but
+    excluding the colon.
+    """
+    type_name = request.param.removesuffix(":")
+    cases = []
+    for base_msg in (LONG_COMMIT_MSG, SHORT_COMMIT_MSG, COMMENTED_COMMIT_MSG):
+        for header in (
+            type_name,
+            f"{type_name}!",
+            f"{type_name}(scope)",
+            f"{type_name}(scope)!",
+            type_name.capitalize(),
+            f"{type_name.upper()}(scope)!",
+        ):
+            cases.append((header, base_msg, f"{header}: {base_msg}"))
+    return cases
+
+
+@pytest.mark.parametrize(
+    "conventional_commit_msgs",
+    prepend_jira_issue.CONVENTIONAL_COMMIT_TYPES,
+    indirect=True,
+)
+def test_prepend_jira_issue_conventional_commit_msg(conventional_commit_msgs):
+    issue = "some_issue"
+
+    for header, base_msg, commit_msg in conventional_commit_msgs:
+        new_msg = prepend_jira_issue.prepend_jira_issue(commit_msg, issue)
+
+        assert new_msg == f"{header}: [{issue}] {base_msg}"
