@@ -2,7 +2,17 @@
 
 A [pre-commit](https://pre-commit.com/) hook to prepend a Jira issue to a commit message, extracted from the current branch name.
 
-With this hook installed, when you commit, if a Jira issue is found in your branch name, and a Jira issue is not already included in your commit message, the Jira issue from the branch name will be prepended to your commit message.
+With this hook installed, when you commit, if a Jira issue is found in your branch name, and a Jira issue is not already
+included in your commit message, the Jira issue from the branch name will be prepended to your commit message.
+```text
+[ABC-123]: added required URL parameter to API endpoint  
+```
+
+This hook supports the [Conventional Commit specification](https://www.conventionalcommits.org/en/v1.0.0/#specification).
+So if your commit message is prefixed with Conventional Commit type, scope or breaking change marker this is considered.
+```text
+feat(api)!: [ABC-123] added required URL parameter to API endpoint  
+```
 
 ## Install
 
